@@ -256,7 +256,7 @@ class Objective:
 
         # Main origin loop
         for s in self.origins:
-            # Free all origin and destinaion variables
+            # Free all origin and destination variables
             new_bound = [(self._var_name(n.index), -cp.infinity) for n in
                          self.origins+self.destinations]
             self.lp.variables.set_lower_bounds(new_bound)
@@ -287,7 +287,7 @@ class Objective:
 
         # Main destination loop
         for s in self.destinations:
-            # Free all origin and destinaion variables
+            # Free all origin and destination variables
             new_bound = [(self._var_name(n.index), -cp.infinity) for n in
                          self.origins+self.destinations]
             self.lp.variables.set_lower_bounds(new_bound)

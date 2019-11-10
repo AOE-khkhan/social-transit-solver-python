@@ -234,7 +234,7 @@ class Constraint:
         revenue, user in-vehicle travel time, user walking time, user waiting
         time).
 
-        The feasability status is returned as an integer (0 for no, 1 for yes).
+        The feasibility status is returned as an integer (0 for no, 1 for yes).
         """
 
         feasible = 1

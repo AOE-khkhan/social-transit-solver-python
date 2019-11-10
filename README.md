@@ -50,6 +50,7 @@ Defines the arcs for the Spiess version of the transit network, which includes d
 IMPORTANT: The constant-cost [Spiess and Florian model](https://www.researchgate.net/publication/222385476_Optimal_Strategies_A_New_Assignment_Model_for_Transit_Networks) involves a modified minimum cost flow LP that will not work unless there exists a path from every origin to every destination.
 
 The columns are arranged as follows:
+
 * `ArcID`: Index of arc. Should be consecutive integers starting at `0`.
 * `ArcType`: `0` for line arcs, `1` for boarding arcs, and `-1` otherwise. This is to highlight the arcs whose travel time needs to be updated with the solution.
 * `Line`: Index of line associated with the arc (`-1` if N/A).
@@ -64,6 +65,7 @@ Defines the arcs for a simpler version of the transit network for calculating pa
 IMPORTANT: The shortest path LP defined by this network will not work unless there exists a path from every origin to every destination and vice-versa. For this reason, this network may involve many more walking arcs than the Spiess version of the network. Make sure to also make every walking arc to and from an origin/destination node reversible.
 
 The columns are arranged as follows:
+
 * `ArcID`: Index of arc. Should be consecutive integers starting at `0`.
 * `ArcType`: `0` for line arcs, `1` for boarding arcs, and `-1` otherwise. This is to highlight the arcs whose travel time needs to be updated with the solution.
 * `Line`: Index of line associated with the arc (`-1` for walking arcs).
@@ -92,6 +94,7 @@ The artificial boarding nodes are named by appending their line's name onto thei
 Defines the nodes for the Spiess version of the transit network, which includes day-to-day traffic origins and destinations.
 
 The columns are arranged as follows:
+
 * `NodeID`: Index of node. Should be consecutive integers starting at `0`.
 * `NodeType`: `0` for origin, `1` for destination, `2` for stop, `3` for line.
 * `Line`: Index of line associated with the node (`-1` if N/A).
@@ -102,6 +105,7 @@ The columns are arranged as follows:
 Defines the nodes for a simpler version of the transit network for calculating pairwise travel times. Includes the origins and destinations of interest for the objective function. The only auxiliary nodes and arcs at a stop are included to separate boarding time from travel time.
 
 The columns are arranged as follows:
+
 * `NodeID`: Index of node. Should be consecutive integers starting at `0`.
 * `NodeType`: `0` for origin (population center), `1` for destination (facility), `2` for stop, `3` for line
 * `Line`: Index of line associated with the node (`-1` if N/A).
@@ -112,6 +116,7 @@ The columns are arranged as follows:
 Defines the OD pairs for the Spiess version of the network.
 
 The columns are arranged as follows:
+
 * `ID`: Index of OD pair. Should be consecutive integer starting at `0`.
 * `Origin`: Index of origin node.
 * `Dest`: Index of destination node.
@@ -119,11 +124,12 @@ The columns are arranged as follows:
 
 ### `Problem_Data.txt`
 
-Input data related to the problem definition, including the initial solution, variable bounds, line data, constraint parameters, etc. Each parameter is written on a separate row, with vectors being written as a single tab-separated row.
+Input data related to the problem definition, including the initial solution, variable bounds, line data, constraint parameters, etc. Each parameter is written on a separate row, with vectors being written as a single tab-separated row. Note that this version of the program uses a 2SFCA metric-based objective, while later versions used a gravity metric-based objective.
 
 Several vectors correspond to the set of lines, while others correspond to the set of vehicle types. In both cases we always maintain a consistent order, so that the elements of multiple vectors with the same index correspond to each other.
 
 The rows are written in the following order:
+
 * `vbound`: Vector of bounds for each vehicle type (i.e. limit to how many of each vehicle type is available).
 * `vcapacity`: Vector of capacities for each vehicle type (number of passengers).
 * `vcost`: Vector of operating costs for each vehicle type (dollars to operate for the entirety of the day-to-day time horizon).
@@ -144,6 +150,7 @@ The rows are written in the following order:
 ### `Search_Parameters.txt`
 
 Contains parameters for the TS/SA hybrid algorithm. Each parameter is written on a separate row, arranged in the following order:
+
 * Comment row.
 * `tmp_init`: Initial SA temperature.
 * `tmp_factor`: Factor by which to multiply the temperature when cooling. Should be between `0` and `1`. May eventually replace with different parameters for use in a different type of cooling schedule.
@@ -164,6 +171,7 @@ Contains parameters for the TS/SA hybrid algorithm. Each parameter is written on
 Defines the transit lines of the network.
 
 The columns are arranged as follows:
+
 * `LineID`: Index of line.
 * `Freq`: Initial line frequency. Note that this will be recalculated many times during the solution algorithm, but the updated frequencies will be maintained in memory.
 * `Capacity`: Initial line capacity. As with `Freq`, this will also be recalculated during the solution algorithm.

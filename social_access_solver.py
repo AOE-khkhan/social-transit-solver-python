@@ -10,123 +10,6 @@ log files are maintained to store solution data and memory structures so that
 the search may be halted and resumed.
 """
 
-# Next changes:
-#   Test current version with CapCon and then Mandl networks.
-#   Switch tiebreaker objective to gravity metric of current lowest 2SFCA metric.
-#   Change fare revenue to only depend on the total number of passengers.
-#   Try tuning parameters with Mandl network to see that things are moving along.
-#   Process real data, test, and possibly work on a standalone C++ implementation.
-#   Try to get a few iterations (~100) of each trial set done by the end of the
-#       month. Write programs to process the data automatically and write up
-#       the results in the thesis, so that this project can be considered
-#       technically complete by the beginning of the semester. During the
-#       semester we can be generating more data and using the programs to
-#       automatically update the data sets in the paper.
-
-# Advice for parameter tuning:
-# A lot of parameters essentially allow us to choose whether to focus more on
-#   intensification or diversification. Run some tests to see which appears to
-#   be more important. Try to develop metrics for when we appear to be getting
-#   trapped in a limited area, or when we seem to be wandering for too long
-#   without an objective improvement.
-# Choose neighborhood sizes based on how long the neighborhood search is
-#   taking. Larger neighborhoods means a more exhaustive search and therefore
-#   more intensification, but might also be more computationally expensive.
-#   Later on we might even dynamically adjust the neighborhood size to
-#   correspond to intensification/diversification phases.
-# Tabu tenures and increments control how much we focus on intensification
-#   versus diversification.
-# Initial temperature and cooling schedule controls how early in the proceess
-#   we begin tightening our restrictions, which essentially corresponds to
-#   a general move towards intensification.
-# The inner/outer counter cutoffs give us some more explicit control over when
-#   to switch between intensification and diversification.
-
-# Run some tests to see relatively how long it takes to calculate the
-# constraint function values versus the objective value. This program was
-# written to try to minimize the required number of constraint function
-# evaluations, but at the cost of running a bunch of preliminary objective
-# function evaluations. If it turns out that those are also expensive, we may
-# need to rethink the structure of the neighborhood search.
-
-# If the constraint calculations are taking way too long and it is becoming a
-# huge issue, then consider versions of the program that involve fewer
-# feasibility evaluations, including the following:
-#   Start by taking bigger steps, which moves us around the solutions pace
-#       faster, and let the step size trail off as the algorithm moves forward.
-#       This could also be tied to diversification and intensification.
-#   It may be necessary to code a C++ version of this entire program, but that
-#       should only be undertaken once everything else is already in place and
-#       running.
-
-# If the search seems to be wandering a lot due to the lack of gradient in the
-# objective, try using the gravity objective as a secondary objective instead
-# of the sum of 2SFCA metrics. It seems likely that only an extreme change from
-# the current solution would have a chance of increasing the minimum, but the
-# algorihm might get caught in an extremely flat spot where it has no idea
-# which direction to head in. The gravity metric is continuous, so all local
-# changes should affect it. Either go with the min or sum of gravity metrics.
-
-# The more I think about it, the more I am unconvinced that this project is
-# justifiable. Setting aside the mismatch between fleet assignments for rush
-# hour traffic and for infrequent primary care-related traffic, the way our
-# model is currently set up attempts to maximize peoples' access to facilities.
-# That access measure ultimately depends on pairwise travel times, and the only
-# way that that depends on the fleet sizes is waiting times, which are likely
-# an insignificant part of the overall trip length unless there is a massive
-# change, and in that case capacity will be much more of an issue than time.
-# I simply do not see someone basing their decision for whether to seek medical
-# care as depending on how long they would have to wait for the bus. With a
-# different social access goal, then maybe, but certainly not health care. We
-# could either try to sell this as being purely a proof of concept, since the
-# 2SFCA metric is a reasonable thing to use for any type of access, or we could
-# work on something more drastic.
-#
-# In the next progress report, write to Dr. K. to float these ideas:
-#
-# For this reason it might be better to try considering the route design
-# problem again. The easiest implementation would include a finite set of
-# specific routes, but more complicated versions could have us constructing a
-# route link-by-link with constraints to enforce that it makes sense as a
-# route.
-# All of the tentative routes would be included in the route set just like all
-# the rest, but we would also have a binary decision (controlled within the
-# TS/SA algorithm somehow) that would indicate which routes exist, and enforce
-# constraints that the non-existant routes have a fleet size of zero. If we
-# make a decision to switch one tentative route for another, we also transfer
-# their entire fleet. This could lead to continuity issues, since these route
-# existence decisions have way more impact than the fleet size decisions.
-# Alternatively, say we just want to add one new route, and we've already
-# decided on how many buses to add (they're allowed to come from nowhere,
-# assuming that CTA is buying new buses). Then we attempt to solve the problem
-# of designing this new route assuming that all fleet sizes are fixed. The
-# decisions now are which links to include in the new route. It could start
-# with a fixed structure based on a heuristically good choice, or it could just
-# start as a single link somewhere, and our local moves would consist of either
-# extending one endpoint, removing one endpoint, or rewiring one endpoint, with
-# constraints to make sure we don't get any crossings or anything.
-# As a simpler alternative to this, we could instead heuristically pick some
-# new route locations likely to be helpful (read some papers about how solution
-# pools for route designs are generated; something to do with gravity). Then
-# simply try re-solving the model with the addition of each of these new
-# routes. This is similar to the thing we wanted to try with adding the new
-# CTA projects (Red Line extension, Orange Line extension, Ashand rapid bus),
-# except that these new projects would be specifically designed to address the
-# access issue. This could still be sold as a relatively minor thing that CTA
-# could do to drastically improve access.
-# As for how to heuristically generate good routes, it should probably have
-# something to do with trying to connect areas with particularly low access to
-# areas with particularly high access. Express routes are also an easy option.
-#
-# Run some tests to see how sensitive everything appears to be to the number of
-# buses on a route. I would suspect that it hardly matters except for the
-# difference between 0 and 1. If that is the case, then we don't need to pay
-# much attention to specific fleet sizes for the purposes of the objective.
-#
-# Note that most of this would probably take all the time I have left this
-# fall, and would probably have to happen instead of, not in addition to, the
-# multiobjective study where we try varying the allowed percentage increase.
-
 import objective.obj_2sfca as ob
 import constraints.constraints as con
 import logger.log_event as elog
@@ -519,7 +402,7 @@ def _neighborhood_search():
                 # Don't attempt an ADD that would exceed the vehicle limit
                 continue
             sol_cand = _sol_move(add=choice) # generate candidate sol vector
-            # Look up solution for feasability status and objective values
+            # Look up solution for feasibility status and objective values
             cand_feas, _, cand_obj, cand_obj2 = _obj_lookup(sol_cand)
             if cand_feas == 0:
                 # Skip moves known to be infeasible
@@ -589,7 +472,7 @@ def _neighborhood_search():
                 # Don't attempt a DROP that would fall below a lower bound
                 continue
             sol_cand = _sol_move(drop=choice) # generate candidate sol vector
-            # Look up solution for feasability status and objective values
+            # Look up solution for feasibility status and objective values
             cand_feas, _, cand_obj, cand_obj2 = _obj_lookup(sol_cand)
             if cand_feas == 0:
                 # Skip moves known to be infeasible
@@ -774,8 +657,6 @@ def _sol_move(add=-1, drop=-1):
 def _tenure_increment():
     """Updates the tabu tenures."""
 
-    #################################################################### The paper uses random increments on [0.01, 0.09].
-
     global tenure, tenure_factor
     tenure *= tenure_factor
 
@@ -783,8 +664,6 @@ def _tenure_increment():
 
 def _cooling(iteration):
     """Updates the SA temperature."""
-
-    ##################################################################### Consider other cooling schedules.
 
     global tmp, tmp_factor
     tmp *= tmp_factor

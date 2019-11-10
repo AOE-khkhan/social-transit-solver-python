@@ -14,7 +14,7 @@ class MemoryLog:
     structures, as well as for writing the current memory structures to the
     log file.
 
-    The log file is arranged so that each row corresponds to a memory strucure
+    The log file is arranged so that each row corresponds to a memory structure
     in the following order:
         comment line explaining the row contents
         list of ADD tabu tenures

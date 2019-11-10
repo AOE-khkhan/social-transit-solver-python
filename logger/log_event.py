@@ -33,7 +33,7 @@ class EventLog:
         Accepts the following optional keyword arguments:
             logfile -- Path to the event log file.
             objfile -- Path to the objective value output.
-            picup -- Indicates whether we are picking up from a previous
+            pickup -- Indicates whether we are picking up from a previous
                 search. Defaults to False. If True, we append to the existing
                 logs, while if False, we start with clear log files.
         """
